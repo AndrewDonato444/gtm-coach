@@ -20,6 +20,8 @@
 | 6. Productize (Cross-Rep + SF Writeback) | 4 | ⬜ Not started |
 | **Total** | **26** | **9 / 26 (35%)** |
 
+*Plus 1 ad-hoc feature shipped (#100 — visual brief layout).*
+
 ## Phase 1: Prototype Foundation ✅
 
 Goal: prove a coaching brief is more useful than a filtered list. Single rep, on-demand upload, no persistence.
@@ -89,6 +91,14 @@ Goal: graduate from single-rep tool to team product. Don't start until Phases 2�
 | 51 | Cross-rep pattern surfacing | vision | L | 50, 23 | ⬜ |
 | 52 | Chrome extension for SF note one-tap paste | vision | L | 30 | ⬜ |
 | 53 | Direct Salesforce API integration | vision | L | — | ⬜ |
+
+## Ad-Hoc Requests
+
+Features added outside the original 26-feature plan, in response to live use feedback. Numbered #100+.
+
+| # | Feature | Source | Complexity | Deps | Status |
+|---|---|---|---|---|---|
+| 100 | Visual brief layout (metrics row + section containers) | feedback | M | 1, 13 | ✅ |
 
 ## Status Legend
 

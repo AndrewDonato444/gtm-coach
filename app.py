@@ -15,6 +15,7 @@ import streamlit as st
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from brief_layout import compute_brief_metrics, format_arr, parse_brief_sections
 from db import save_snapshot
 from delta import compute_latest_delta, format_delta_for_brief
 from validation import validate_columns
@@ -108,6 +109,20 @@ if st.button("Coach me", disabled=not uploaded, type="primary"):
 {rep_context.strip() if rep_context.strip() else '(none provided)'}
 """
 
+    # ── At-a-glance metrics row (computed from snapshot, not from brief) ───
+    metrics = compute_brief_metrics(df)
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Accounts in territory", str(metrics["total_accounts"]))
+    m2.metric("ARR at risk (next 120d)", format_arr(metrics["arr_at_risk"]))
+    m3.metric(
+        "Red Zone fires",
+        str(metrics["red_zone_fires"]) if metrics["red_zone_fires"] is not None else "—",
+    )
+    m4.metric(
+        "Days to next renewal",
+        str(metrics["days_to_next_renewal"]) if metrics["days_to_next_renewal"] is not None else "—",
+    )
+
     client = Anthropic()
     placeholder = st.empty()
     accumulated = ""
@@ -134,6 +149,18 @@ if st.button("Coach me", disabled=not uploaded, type="primary"):
                 placeholder.markdown(accumulated.replace("$", "\\$"))
 
             final = stream.get_final_message()
+
+    # ── Replace the streaming placeholder with structured sections ─────────
+    sections = parse_brief_sections(accumulated)
+    with placeholder.container():
+        for section in sections:
+            with st.container(border=True):
+                if section["heading"]:
+                    if section["kind"] == "headline":
+                        st.markdown(f"### 📌 {section['heading']}")
+                    else:
+                        st.markdown(f"### {section['heading']}")
+                st.markdown(section["body"].replace("$", "\\$"))
 
     st.divider()
     with st.expander("Run details"):
