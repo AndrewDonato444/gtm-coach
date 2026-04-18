@@ -114,7 +114,7 @@ if st.button("Coach me", disabled=not uploaded, type="primary"):
 
     with st.spinner("Thinking through your territory..."):
         with client.messages.stream(
-            model="claude-opus-4-7",
+            model="claude-sonnet-4-6",
             max_tokens=64000,
             thinking={"type": "adaptive"},
             output_config={"effort": "high"},
