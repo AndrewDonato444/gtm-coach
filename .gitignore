@@ -1,0 +1,23 @@
+# Local SQLite storage — territory snapshots stay on the rep's machine
+storage.db
+storage.db-journal
+storage.db-wal
+storage.db-shm
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets
+.env
+.env.local

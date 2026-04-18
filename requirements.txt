@@ -1,0 +1,7 @@
+streamlit>=1.30
+anthropic>=0.40
+pandas>=2.0
+openpyxl>=3.1
+tabulate>=0.9
+pytest>=8.0
+python-dotenv>=1.0
