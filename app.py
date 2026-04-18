@@ -16,7 +16,7 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 
 from brief_layout import compute_brief_metrics, format_arr, parse_brief_sections
-from db import save_snapshot
+from db import save_brief, save_snapshot
 from delta import compute_latest_delta, format_delta_for_brief
 from validation import validate_columns
 
@@ -150,6 +150,17 @@ if st.button("Coach me", disabled=not uploaded, type="primary"):
 
             final = stream.get_final_message()
 
+    # ── Persist the brief so the rep can revisit it later ──────────────────
+    brief_id, brief_generated_at = save_brief(
+        snapshot_id=snapshot_id,
+        brief_text=accumulated,
+        rep_context=rep_context.strip() if rep_context.strip() else None,
+        model="claude-sonnet-4-6",
+        input_tokens=final.usage.input_tokens,
+        output_tokens=final.usage.output_tokens,
+        cache_read_tokens=final.usage.cache_read_input_tokens,
+    )
+
     # ── Replace the streaming placeholder with structured sections ─────────
     sections = parse_brief_sections(accumulated)
     with placeholder.container():
@@ -165,8 +176,8 @@ if st.button("Coach me", disabled=not uploaded, type="primary"):
     st.divider()
     with st.expander("Run details"):
         usage = final.usage
-        st.write(f"Snapshot ID: {snapshot_id}")
-        st.write(f"Saved at: {snapshot_timestamp}")
+        st.write(f"Brief ID: {brief_id}  (saved at {brief_generated_at})")
+        st.write(f"Snapshot ID: {snapshot_id}  (saved at {snapshot_timestamp})")
         st.write(f"Input tokens: {usage.input_tokens}")
         st.write(f"Cache read: {usage.cache_read_input_tokens}")
         st.write(f"Cache create: {usage.cache_creation_input_tokens}")

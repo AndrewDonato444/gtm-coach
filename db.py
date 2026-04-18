@@ -58,6 +58,24 @@ def init_db(db_path: Optional[Path] = None) -> None:
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_account_rows_snapshot ON account_rows(snapshot_id)"
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS briefs (
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                snapshot_id       INTEGER NOT NULL REFERENCES snapshots(id),
+                generated_at      TEXT NOT NULL,
+                brief_text        TEXT NOT NULL,
+                rep_context       TEXT,
+                model             TEXT,
+                input_tokens      INTEGER,
+                output_tokens     INTEGER,
+                cache_read_tokens INTEGER
+            )
+            """
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_briefs_snapshot ON briefs(snapshot_id)"
+        )
 
 
 def _normalize_account_id(row: dict) -> str:
@@ -229,6 +247,83 @@ def get_account_history(
         }
         for row in rows
     ]
+
+
+def save_brief(
+    snapshot_id: int,
+    brief_text: str,
+    rep_context: Optional[str] = None,
+    model: Optional[str] = None,
+    input_tokens: Optional[int] = None,
+    output_tokens: Optional[int] = None,
+    cache_read_tokens: Optional[int] = None,
+    db_path: Optional[Path] = None,
+) -> tuple[int, str]:
+    """Persist a generated brief linked to its source snapshot.
+
+    Returns (brief_id, generated_at_iso).
+    """
+    init_db(db_path)
+    generated_at = datetime.now().isoformat(timespec="seconds")
+    with _connect(db_path) as conn:
+        cur = conn.execute(
+            """
+            INSERT INTO briefs
+                (snapshot_id, generated_at, brief_text, rep_context, model,
+                 input_tokens, output_tokens, cache_read_tokens)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                snapshot_id,
+                generated_at,
+                brief_text,
+                rep_context,
+                model,
+                input_tokens,
+                output_tokens,
+                cache_read_tokens,
+            ),
+        )
+        brief_id = cur.lastrowid
+    return brief_id, generated_at
+
+
+def _row_to_brief(row: sqlite3.Row, include_text: bool) -> dict:
+    brief = {
+        "id": row["id"],
+        "snapshot_id": row["snapshot_id"],
+        "generated_at": row["generated_at"],
+        "rep_context": row["rep_context"],
+        "model": row["model"],
+        "input_tokens": row["input_tokens"],
+        "output_tokens": row["output_tokens"],
+        "cache_read_tokens": row["cache_read_tokens"],
+    }
+    if include_text:
+        brief["brief_text"] = row["brief_text"]
+    return brief
+
+
+def get_briefs(db_path: Optional[Path] = None) -> list[dict]:
+    """Return summaries of all briefs, newest first. No brief_text payload."""
+    init_db(db_path)
+    with _connect(db_path) as conn:
+        rows = conn.execute(
+            "SELECT * FROM briefs ORDER BY generated_at DESC, id DESC"
+        ).fetchall()
+    return [_row_to_brief(row, include_text=False) for row in rows]
+
+
+def get_brief(
+    brief_id: int, db_path: Optional[Path] = None
+) -> Optional[dict]:
+    """Return a single brief (with full text) by ID, or None."""
+    init_db(db_path)
+    with _connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT * FROM briefs WHERE id = ?", (brief_id,)
+        ).fetchone()
+    return _row_to_brief(row, include_text=True) if row else None
 
 
 def get_accounts_in_snapshot(

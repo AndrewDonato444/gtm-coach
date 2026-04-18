@@ -18,7 +18,7 @@
 | 4. Drafted Artifacts | 4 | ⬜ Not started |
 | 5. Push, Not Pull (Scheduled Briefs) | 4 | ⬜ Not started |
 | 6. Productize (Cross-Rep + SF Writeback) | 4 | ⬜ Not started |
-| **Total** | **26** | **9 / 26 (35%)** |
+| **Total** | **26** | **10 / 26 (38%)** |
 
 *Plus 1 ad-hoc feature shipped (#100 — visual brief layout).*
 
@@ -51,7 +51,7 @@ Goal: every brief gets rated by Matt. Wrong recommendations get marked. Feedback
 
 | # | Feature | Source | Complexity | Deps | Status |
 |---|---|---|---|---|---|
-| 20 | Persist every brief generated (linked to snapshot) | vision | S | 10 | ⬜ |
+| 20 | Persist every brief generated (linked to snapshot) | vision | S | 10 | ✅ |
 | 21 | Brief rating UI (per-recommendation thumbs) | vision | M | 20 | ⬜ |
 | 22 | Brief annotation UI ("this was wrong because…") | vision | M | 20 | ⬜ |
 | 23 | Feedback aggregation report (what's tracking, what's not) | vision | M | 21, 22 | ⬜ |
